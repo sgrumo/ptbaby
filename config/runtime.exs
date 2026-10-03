@@ -64,10 +64,10 @@ if config_env() == :prod do
            """)
 
   config :averziano, Averziano.Mailer,
-    adapter: Swoosh.Adapters.Resend,
+    adapter: Swoosh.Adapters.Brevo,
     api_key:
-      System.get_env("RESEND_API_KEY") ||
-        raise("environment variable RESEND_API_KEY is missing.")
+      System.get_env("BREVO_API_KEY") ||
+        raise("environment variable BREVO_API_KEY is missing.")
 
   config :swoosh, :api_client, Swoosh.ApiClient.Req
 
@@ -77,7 +77,7 @@ if config_env() == :prod do
           System.get_env("MAIL_FROM") ||
             raise("""
             environment variable MAIL_FROM is missing.
-            Use an address on a domain verified in Resend, e.g. noreply@yourdomain.it
+            Use a sender address verified in Brevo (Senders, Domains & Dedicated IPs).
             """)}
 
   config :averziano, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
