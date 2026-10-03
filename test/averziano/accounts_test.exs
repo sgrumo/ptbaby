@@ -5,15 +5,26 @@ defmodule Averziano.AccountsTest do
   alias Averziano.Accounts.User
   alias Averziano.Errors
 
-  describe "register_user/2" do
-    test "creates a user with a case-insensitive unique email" do
-      assert {:ok, %User{} = user} =
-               Accounts.register_user(%{email: "Ada@Example.com", name: "Ada"}, actor: actor())
+  setup do
+    coach = generate(coach())
+    client = generate(client(coach: coach))
 
-      assert to_string(user.email) == "Ada@Example.com"
+    %{
+      coach: coach,
+      client: client,
+      as_coach: %{"sub" => coach.id},
+      as_client: %{"sub" => client.id}
+    }
+  end
+
+  describe "invite_client/2" do
+    test "emails are unique regardless of case", ctx do
+      params = %{first_name: "Ada", last_name: "Lovelace", email: "Ada@Example.com"}
+      assert {:ok, %User{} = ada} = Accounts.invite_client(params, actor: ctx.as_coach)
+      assert to_string(ada.email) == "Ada@Example.com"
 
       assert {:error, error} =
-               Accounts.register_user(%{email: "ada@example.com", name: "Dup"}, actor: actor())
+               Accounts.invite_client(%{params | email: "ada@example.com"}, actor: ctx.as_coach)
 
       assert {:error, :unprocessable_entity, %{email: [message]}} =
                Errors.normalize({:error, error})
@@ -21,50 +32,64 @@ defmodule Averziano.AccountsTest do
       assert message =~ "already been taken"
     end
 
-    test "returns field errors for missing attributes" do
-      assert {:error, error} = Accounts.register_user(%{}, actor: actor())
+    test "returns field errors for missing attributes", ctx do
+      assert {:error, error} = Accounts.invite_client(%{}, actor: ctx.as_coach)
 
       assert {:error, :unprocessable_entity, errors} = Errors.normalize({:error, error})
       assert Map.has_key?(errors, :email)
-      assert Map.has_key?(errors, :name)
+      assert Map.has_key?(errors, :first_name)
     end
   end
 
-  describe "get_user/2" do
-    test "returns the user, or a not found error" do
-      user = generate(user())
+  describe "register_user/2" do
+    test "nobody can sign up: users are invited", ctx do
+      assert {:error, error} =
+               Accounts.register_user(%{email: "x@example.com", name: "X"}, actor: ctx.as_client)
 
-      assert {:ok, %User{id: id}} = Accounts.get_user(user.id, actor: actor())
-      assert id == user.id
+      assert Errors.normalize({:error, error}) == {:error, :forbidden}
+    end
+  end
 
-      assert {:error, error} = Accounts.get_user(Ash.UUID.generate(), actor: actor())
+  describe "get_user/2 and list_users/1" do
+    test "users see themselves, their coach and their clients, nobody else", ctx do
+      stranger = generate(user())
+
+      assert {:ok, _} = Accounts.get_user(ctx.client.id, actor: ctx.as_client)
+      assert {:ok, _} = Accounts.get_user(ctx.coach.id, actor: ctx.as_client)
+      assert {:ok, _} = Accounts.get_user(ctx.client.id, actor: ctx.as_coach)
+
+      assert {:error, error} = Accounts.get_user(stranger.id, actor: ctx.as_coach)
       assert Errors.normalize({:error, error}) == {:error, :not_found}
+
+      assert {:ok, users} = Accounts.list_users(actor: ctx.as_coach)
+      assert users |> Enum.map(& &1.id) |> Enum.sort() == Enum.sort([ctx.coach.id, ctx.client.id])
     end
   end
 
   describe "update_user/3 and delete_user/2" do
-    test "updates the name and deletes the user" do
-      user = generate(user(name: "Before"))
-
+    test "users rename themselves; the coach removes their clients", ctx do
       assert {:ok, %User{name: "After"}} =
-               Accounts.update_user(user, %{name: "After"}, actor: actor())
+               Accounts.update_user(ctx.client, %{name: "After"}, actor: ctx.as_client)
 
-      assert :ok = Accounts.delete_user(user, actor: actor())
-      assert {:ok, []} = Accounts.list_users(actor: actor())
+      assert {:error, error} =
+               Accounts.update_user(ctx.client, %{name: "Nope"}, actor: ctx.as_coach)
+
+      assert Errors.normalize({:error, error}) == {:error, :forbidden}
+
+      assert {:error, error} = Accounts.delete_user(ctx.coach, actor: ctx.as_client)
+      assert Errors.normalize({:error, error}) == {:error, :forbidden}
+
+      assert :ok = Accounts.delete_user(ctx.client, actor: ctx.as_coach)
+      assert {:ok, []} = Accounts.list_clients(actor: ctx.as_coach)
     end
   end
 
   describe "policies" do
-    test "without an actor, reads are filtered to nothing and writes are forbidden" do
-      user = generate(user())
-
+    test "without an actor, reads are filtered to nothing and writes are forbidden", ctx do
       # `no_filter_static_forbidden_reads?: false` turns a forbidden read into an empty result.
       assert {:ok, []} = Accounts.list_users()
 
-      assert {:error, error} = Accounts.register_user(%{email: "x@example.com", name: "X"})
-      assert Errors.normalize({:error, error}) == {:error, :forbidden}
-
-      assert {:error, error} = Accounts.update_user(user, %{name: "Nope"})
+      assert {:error, error} = Accounts.update_user(ctx.client, %{name: "Nope"})
       assert Errors.normalize({:error, error}) == {:error, :forbidden}
     end
   end

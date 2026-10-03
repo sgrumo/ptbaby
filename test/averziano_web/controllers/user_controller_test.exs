@@ -2,7 +2,13 @@ defmodule AverzianoWeb.UserControllerTest do
   use AverzianoWeb.ConnCase, async: true
 
   setup %{conn: conn} do
-    {:ok, conn: conn |> authenticate() |> put_req_header("accept", "application/json")}
+    coach = generate(coach())
+    client = generate(client(coach: coach))
+
+    {:ok,
+     conn: conn |> authenticate(coach) |> put_req_header("accept", "application/json"),
+     coach: coach,
+     client: client}
   end
 
   test "rejects unauthenticated requests", %{conn: conn} do
@@ -12,50 +18,39 @@ defmodule AverzianoWeb.UserControllerTest do
              conn |> get(~p"/api/users") |> json_response(401)
   end
 
-  test "GET /api/users lists users", %{conn: conn} do
-    users = generate_many(user(), 2)
+  test "GET /api/users lists the coach and their clients only", ctx do
+    generate(user())
 
-    assert %{"data" => data} = conn |> get(~p"/api/users") |> json_response(200)
-    assert Enum.sort(Enum.map(data, & &1["id"])) == Enum.sort(Enum.map(users, & &1.id))
+    assert %{"data" => data} = ctx.conn |> get(~p"/api/users") |> json_response(200)
+    assert data |> Enum.map(& &1["id"]) |> Enum.sort() == Enum.sort([ctx.coach.id, ctx.client.id])
   end
 
-  test "GET /api/users/:id returns the user or 404", %{conn: conn} do
-    user = generate(user(name: "Ada"))
+  test "GET /api/users/:id returns a visible user, 404 for anyone else", ctx do
+    assert %{"data" => %{"id" => id, "email" => email}} =
+             ctx.conn |> get(~p"/api/users/#{ctx.client.id}") |> json_response(200)
 
-    assert %{"data" => %{"id" => id, "name" => "Ada", "email" => email}} =
-             conn |> get(~p"/api/users/#{user.id}") |> json_response(200)
+    assert id == ctx.client.id
+    assert email == to_string(ctx.client.email)
 
-    assert id == user.id
-    assert email == to_string(user.email)
+    stranger = generate(user())
 
     assert %{"errors" => %{"detail" => "Not Found"}} =
-             conn |> get(~p"/api/users/#{Ash.UUID.generate()}") |> json_response(404)
+             ctx.conn |> get(~p"/api/users/#{stranger.id}") |> json_response(404)
   end
 
-  test "POST /api/users creates a user and returns 422 on invalid input", %{conn: conn} do
-    params = %{"email" => "ada@example.com", "name" => "Ada"}
-
-    created = conn |> post(~p"/api/users", user: params) |> json_response(201)
-    assert %{"data" => %{"id" => id, "email" => "ada@example.com", "name" => "Ada"}} = created
-
-    assert %{"data" => %{"id" => ^id}} =
-             conn |> get(~p"/api/users/#{id}") |> json_response(200)
-
-    assert %{"errors" => %{"name" => [_ | _]}} =
-             conn
-             |> post(~p"/api/users", user: %{"email" => "bob@example.com"})
-             |> json_response(422)
+  test "POST /api/users is forbidden: users are invited", ctx do
+    assert ctx.conn
+           |> post(~p"/api/users", user: %{"email" => "bob@example.com", "name" => "Bob"})
+           |> json_response(403)
   end
 
-  test "PATCH /api/users/:id updates and DELETE removes the user", %{conn: conn} do
-    user = generate(user())
-
+  test "PATCH renames yourself, DELETE removes a client", ctx do
     assert %{"data" => %{"name" => "Renamed"}} =
-             conn
-             |> patch(~p"/api/users/#{user.id}", user: %{"name" => "Renamed"})
+             ctx.conn
+             |> patch(~p"/api/users/#{ctx.coach.id}", user: %{"name" => "Renamed"})
              |> json_response(200)
 
-    assert conn |> delete(~p"/api/users/#{user.id}") |> response(204)
-    assert conn |> get(~p"/api/users/#{user.id}") |> json_response(404)
+    assert ctx.conn |> delete(~p"/api/users/#{ctx.client.id}") |> response(204)
+    assert ctx.conn |> get(~p"/api/users/#{ctx.client.id}") |> json_response(404)
   end
 end

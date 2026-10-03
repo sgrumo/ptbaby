@@ -12,6 +12,9 @@ config :averziano, AverzianoWeb.Endpoint,
     ]
   ]
 
+# Session cookies only travel over HTTPS (read at compile time by the endpoint).
+config :averziano, :secure_cookies, true
+
 # Do not print debug messages in production
 config :logger, level: :info
 

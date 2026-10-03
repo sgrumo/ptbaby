@@ -1,11 +1,15 @@
 defmodule AverzianoWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :averziano
 
+  # The session holds the login token: encrypted, not just signed, and
+  # HTTPS-only in production.
   @session_options [
     store: :cookie,
     key: "_averziano_key",
     signing_salt: "LQVaD7sn",
-    same_site: "Lax"
+    encryption_salt: "q3Vb9mXe",
+    same_site: "Lax",
+    secure: Application.compile_env(:averziano, :secure_cookies, false)
   ]
 
   socket "/live", Phoenix.LiveView.Socket,

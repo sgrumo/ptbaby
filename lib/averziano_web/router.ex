@@ -1,5 +1,6 @@
 defmodule AverzianoWeb.Router do
   use AverzianoWeb, :router
+  use AshAuthentication.Phoenix.Router
 
   pipeline :api do
     plug :accepts, ["json"]
@@ -12,6 +13,7 @@ defmodule AverzianoWeb.Router do
     plug :put_root_layout, html: {AverzianoWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug :load_from_session
   end
 
   pipeline :authenticated do
@@ -33,11 +35,25 @@ defmodule AverzianoWeb.Router do
     resources "/users", UserController, except: [:new, :edit]
   end
 
+  # Sign-in (magic link) and sign-out
+  scope "/", AverzianoWeb do
+    pipe_through :browser
+
+    get "/", AuthController, :home
+    auth_routes(AuthController, Averziano.Accounts.User, path: "/auth")
+    delete "/sign-out", AuthController, :sign_out
+
+    live_session :sign_in, layout: {AverzianoWeb.Layouts, :client} do
+      live "/sign-in", Auth.SignInLive
+      live "/sign-in/:token", Auth.MagicLinkLive
+    end
+  end
+
   # Client app (browser + LiveView, mobile)
   scope "/app", AverzianoWeb.Client do
     pipe_through :browser
 
-    live_session :client,
+    ash_authentication_live_session :client,
       on_mount: [AverzianoWeb.Live.AuthHook],
       layout: {AverzianoWeb.Layouts, :client} do
       live "/", ProgramLive
@@ -52,7 +68,7 @@ defmodule AverzianoWeb.Router do
   scope "/admin", AverzianoWeb.Admin do
     pipe_through :browser
 
-    live_session :admin,
+    ash_authentication_live_session :admin,
       on_mount: [AverzianoWeb.Live.AuthHook, AverzianoWeb.Live.CoachHook],
       layout: {AverzianoWeb.Layouts, :admin} do
       live "/", ClientsLive, :index
@@ -65,12 +81,18 @@ defmodule AverzianoWeb.Router do
     end
   end
 
-  # Metrics dashboard (telemetry_ui)
+  # Development only: sign in without email, and read sent emails.
   if Application.compile_env(:averziano, :dev_routes) do
     scope "/dev", AverzianoWeb do
       pipe_through :browser
 
       get "/sign-in/:user_id", DevSessionController, :create
+    end
+
+    scope "/dev" do
+      pipe_through :browser
+
+      forward "/mailbox", Plug.Swoosh.MailboxPreview
     end
   end
 end

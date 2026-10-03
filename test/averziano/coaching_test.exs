@@ -29,8 +29,12 @@ defmodule Averziano.CoachingTest do
       assert luca.coach_id == ctx.coach.id
       assert %DateTime{} = luca.invited_at
 
-      other_coach = generate(coach())
-      generate(client(coach: other_coach))
+      assert_received {:email, %{to: [{"", "luca@example.com"}]} = invitation}
+      assert invitation.subject == "Davide Moretti ti ha invitato su Work Baby"
+      assert invitation.text_body =~ "/sign-in"
+
+      # Someone who isn't the coach's client.
+      generate(user())
 
       assert {:ok, clients} = Accounts.list_clients(actor: ctx.as_coach)
       assert clients |> Enum.map(& &1.name) |> Enum.sort() == ["Giulia Rossi", "Luca Ferri"]
@@ -46,7 +50,7 @@ defmodule Averziano.CoachingTest do
 
   describe "programs" do
     test "a coach builds programs only for their own clients", ctx do
-      other_client = generate(client(coach: generate(coach())))
+      other_client = generate(user())
       monday = Date.utc_today() |> Date.beginning_of_week() |> Date.add(7)
 
       params = %{
@@ -207,9 +211,8 @@ defmodule Averziano.CoachingTest do
   end
 
   describe "templates" do
-    test "each coach sees their own library, with how many clients use each template", ctx do
+    test "the coach sees the library, with how many clients use each template", ctx do
       template = generate(template(coach: ctx.coach))
-      generate(template(coach: generate(coach()), name: "Altrui"))
 
       for _ <- 1..2 do
         generate(
@@ -223,7 +226,26 @@ defmodule Averziano.CoachingTest do
       assert listed.id == template.id
       assert listed.clients_count == 1
 
+      assert {:ok, []} = Training.list_templates(actor: ctx.as_client)
+
       assert {:error, error} = Training.create_template(%{name: "X"}, actor: ctx.as_client)
+      assert Errors.normalize({:error, error}) == {:error, :forbidden}
+    end
+  end
+
+  describe "the coach account" do
+    test "there can be only one, and nobody can become coach through a request", ctx do
+      assert {:error, error} =
+               Accounts.register_coach(%{email: "second@example.com", name: "Second"},
+                 authorize?: false
+               )
+
+      assert {:error, :unprocessable_entity, %{role: ["esiste già un coach"]}} =
+               Errors.normalize({:error, error})
+
+      assert {:error, error} =
+               Accounts.register_coach(%{email: "x@example.com", name: "X"}, actor: ctx.as_coach)
+
       assert Errors.normalize({:error, error}) == {:error, :forbidden}
     end
   end
@@ -299,14 +321,14 @@ defmodule Averziano.CoachingTest do
           actor: ctx.as_coach
         )
 
-      other_coach = %{"sub" => generate(coach()).id}
+      other_client = %{"sub" => generate(client(coach: ctx.coach)).id}
 
       assert {:ok, []} = Training.list_client_notes(ctx.client.id, actor: ctx.as_client)
-      assert {:ok, []} = Training.list_client_notes(ctx.client.id, actor: other_coach)
+      assert {:ok, []} = Training.list_client_notes(ctx.client.id, actor: other_client)
 
       assert {:error, error} =
                Training.create_client_note(%{client_id: ctx.client.id, kind: :general, body: "x"},
-                 actor: other_coach
+                 actor: other_client
                )
 
       assert Errors.normalize({:error, error}) == {:error, :forbidden}

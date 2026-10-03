@@ -48,7 +48,8 @@ defmodule Averziano.Generator do
       defaults: [
         email: sequence(:client_email, &"client#{&1}@example.com"),
         first_name: "Giulia",
-        last_name: "Rossi"
+        last_name: "Rossi",
+        phone: nil
       ],
       overrides: opts,
       actor: %{"sub" => coach.id},
@@ -92,7 +93,8 @@ defmodule Averziano.Generator do
         starts_on: monday,
         ends_on: Date.add(monday, 13),
         weeks_count: 2,
-        days: [plan_day()]
+        days: [plan_day()],
+        template_id: nil
       ],
       overrides: opts,
       actor: %{"sub" => coach.id},
@@ -142,7 +144,8 @@ defmodule Averziano.Generator do
         week_number: 1,
         day_label: "A",
         title: "Total body",
-        scheduled_on: Date.utc_today()
+        scheduled_on: Date.utc_today(),
+        coach_note: nil
       ],
       overrides: opts,
       authorize?: false
@@ -159,7 +162,13 @@ defmodule Averziano.Generator do
         kind: :reps,
         sets_count: 5,
         target_reps: 5,
-        target_load_kg: Decimal.new(50)
+        target_load_kg: Decimal.new(50),
+        target_seconds: nil,
+        sequence: nil,
+        sequence_rest_seconds: nil,
+        rest_seconds: 90,
+        notes: nil,
+        videos: []
       ],
       overrides: opts,
       authorize?: false
@@ -169,6 +178,10 @@ defmodule Averziano.Generator do
   @doc "The next set of `exercise_id`."
   @spec set_log(keyword()) :: StreamData.t(Ash.Changeset.t())
   def set_log(opts) do
-    changeset_generator(SetLog, :log, overrides: opts, authorize?: false)
+    changeset_generator(SetLog, :log,
+      defaults: [reps: nil, load_kg: nil, seconds: nil, outcome: nil, note: nil],
+      overrides: opts,
+      authorize?: false
+    )
   end
 end

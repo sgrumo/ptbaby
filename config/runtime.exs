@@ -55,6 +55,31 @@ if config_env() == :prod do
 
   host = System.get_env("PHX_HOST") || "example.com"
 
+  config :averziano,
+         :token_signing_secret,
+         System.get_env("TOKEN_SIGNING_SECRET") ||
+           raise("""
+           environment variable TOKEN_SIGNING_SECRET is missing.
+           It signs login tokens; generate one with: mix phx.gen.secret
+           """)
+
+  config :averziano, Averziano.Mailer,
+    adapter: Swoosh.Adapters.Resend,
+    api_key:
+      System.get_env("RESEND_API_KEY") ||
+        raise("environment variable RESEND_API_KEY is missing.")
+
+  config :swoosh, :api_client, Swoosh.ApiClient.Req
+
+  config :averziano,
+         :mail_from,
+         {"Work Baby",
+          System.get_env("MAIL_FROM") ||
+            raise("""
+            environment variable MAIL_FROM is missing.
+            Use an address on a domain verified in Resend, e.g. noreply@yourdomain.it
+            """)}
+
   config :averziano, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
 
   config :averziano, AverzianoWeb.Endpoint,

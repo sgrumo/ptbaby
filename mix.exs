@@ -65,6 +65,11 @@ defmodule Averziano.MixProject do
 
       # Auth
       {:joken, "~> 2.6"},
+      {:ash_authentication, "~> 4.15"},
+      {:ash_authentication_phoenix, "~> 2.17"},
+
+      # Email
+      {:swoosh, "~> 1.28"},
 
       # CORS
       {:corsica, "~> 2.1"},

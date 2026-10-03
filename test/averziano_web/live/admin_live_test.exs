@@ -81,8 +81,8 @@ defmodule AverzianoWeb.AdminLiveTest do
       assert view |> element("#clients") |> render() =~ "Invito inviato"
     end
 
-    test "a client of another coach is not found", ctx do
-      stranger = generate(client(coach: generate(coach())))
+    test "someone who isn't the coach's client is not found", ctx do
+      stranger = generate(user())
 
       assert {:error, {:live_redirect, %{to: "/admin"}}} =
                live(ctx.conn, ~p"/admin/clients/#{stranger.id}")

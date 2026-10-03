@@ -70,7 +70,7 @@ defmodule AverzianoWeb.CoreComponents do
   attr :field, Phoenix.HTML.FormField
   attr :errors, :list, default: []
   attr :class, :any, default: nil
-  attr :rest, :global, include: ~w(placeholder required disabled readonly rows)
+  attr :rest, :global, include: ~w(placeholder required disabled readonly rows autocomplete)
 
   @spec input(map()) :: Phoenix.LiveView.Rendered.t()
   def input(%{field: %Phoenix.HTML.FormField{} = field} = assigns) do

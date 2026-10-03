@@ -3,5 +3,6 @@ defmodule Averziano.Auth.TokenMock do
 
   @spec verify_token(String.t()) :: {:ok, map()} | {:error, :unauthorized}
   def verify_token("valid_token"), do: {:ok, %{"sub" => "test-user-id"}}
+  def verify_token("user:" <> user_id), do: {:ok, %{"sub" => user_id}}
   def verify_token(_token), do: {:error, :unauthorized}
 end

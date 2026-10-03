@@ -13,6 +13,11 @@
 # Programs are published through the real action, which generates sessions.
 # Sign in in dev at the URLs printed at the end.
 
+# Demo data, including a coach account: never in production.
+if Mix.env() != :dev do
+  Mix.raise("priv/repo/seeds.exs creates demo accounts (including a coach) and only runs in dev")
+end
+
 alias Averziano.{Accounts, Training}
 
 require Ash.Query

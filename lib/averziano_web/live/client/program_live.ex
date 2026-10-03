@@ -98,9 +98,18 @@ defmodule AverzianoWeb.Client.ProgramLive do
       <div class="flex flex-col gap-1.5 px-6 pt-6">
         <div class="flex items-center justify-between">
           <span class="text-sm text-neutral-500">Ciao {TrainingLabels.first_name(@name)}</span>
-          <span class="flex h-9 w-9 items-center justify-center rounded-full bg-primary-100 text-[13px] font-semibold text-primary-800">
-            {TrainingLabels.initials(@name)}
-          </span>
+          <div class="flex items-center gap-3">
+            <.link
+              href={~p"/sign-out"}
+              method="delete"
+              class="text-[13px] font-medium text-neutral-500"
+            >
+              Esci
+            </.link>
+            <span class="flex h-9 w-9 items-center justify-center rounded-full bg-primary-100 text-[13px] font-semibold text-primary-800">
+              {TrainingLabels.initials(@name)}
+            </span>
+          </div>
         </div>
 
         <%= if @program do %>

@@ -59,6 +59,11 @@ config :averziano, AverzianoWeb.Endpoint,
 
 config :averziano, token_verifier: Averziano.Auth.Token
 
+# Email: the local mailbox (/dev/mailbox) unless an environment overrides it.
+config :averziano, Averziano.Mailer, adapter: Swoosh.Adapters.Local
+config :averziano, :mail_from, {"Work Baby", "noreply@example.com"}
+config :swoosh, :api_client, false
+
 config :logger, :default_formatter,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]

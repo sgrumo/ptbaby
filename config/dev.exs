@@ -22,6 +22,8 @@ config :averziano, AverzianoWeb.Endpoint,
 
 config :averziano, dev_routes: true
 
+config :averziano, :token_signing_secret, "dev-only-token-signing-secret-change-me-in-prod"
+
 config :ash, policies: [show_policy_breakdowns?: true]
 
 config :logger, :default_formatter, format: "[$level] $message\n"

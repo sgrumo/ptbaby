@@ -32,6 +32,15 @@
         <span class="truncate text-sm font-semibold">{@current_user.name}</span>
         <span class="text-xs text-neutral-500">Personal trainer</span>
       </div>
+      <.link
+        href={~p"/sign-out"}
+        method="delete"
+        aria-label="Esci"
+        title="Esci"
+        class="ml-auto flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-neutral-500 hover:bg-neutral-100 hover:text-neutral-800"
+      >
+        <.icon name="hero-arrow-right-on-rectangle" class="h-[18px] w-[18px]" />
+      </.link>
     </div>
   </aside>
 

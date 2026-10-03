@@ -15,6 +15,9 @@ config :averziano, AverzianoWeb.Endpoint,
 
 config :averziano, token_verifier: Averziano.Auth.TokenMock
 
+config :averziano, :token_signing_secret, "test-only-token-signing-secret"
+config :averziano, Averziano.Mailer, adapter: Swoosh.Adapters.Test
+
 config :ash,
   disable_async?: true,
   policies: [show_policy_breakdowns?: true]

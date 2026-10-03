@@ -6,8 +6,8 @@ defmodule AverzianoWeb.ClientLiveTest do
   alias Averziano.Training
 
   setup %{conn: conn} do
-    coach = generate(user(name: "Davide Moretti"))
-    client = generate(user(name: "Giulia Rossi"))
+    coach = generate(coach(name: "Davide Moretti"))
+    client = generate(client(coach: coach, first_name: "Giulia", last_name: "Rossi"))
     program = generate(program(coach: coach, client_id: client.id))
 
     session =
@@ -24,6 +24,7 @@ defmodule AverzianoWeb.ClientLiveTest do
 
     %{
       conn: sign_in(conn, client),
+      coach: coach,
       client: client,
       program: program,
       session: session,
@@ -32,7 +33,7 @@ defmodule AverzianoWeb.ClientLiveTest do
   end
 
   test "the client app requires a signed-in user" do
-    assert {:error, {:redirect, %{to: "/"}}} = live(build_conn(), ~p"/app")
+    assert {:error, {:redirect, %{to: "/sign-in"}}} = live(build_conn(), ~p"/app")
   end
 
   describe "program" do
@@ -46,8 +47,8 @@ defmodule AverzianoWeb.ClientLiveTest do
       assert view |> element("#session-#{ctx.session.id}") |> render() =~ "Oggi"
     end
 
-    test "tells a client without a program that none is assigned yet" do
-      conn = sign_in(build_conn(), generate(user()))
+    test "tells a client without a program that none is assigned yet", ctx do
+      conn = sign_in(build_conn(), generate(client(coach: ctx.coach)))
       {:ok, view, _html} = live(conn, ~p"/app")
 
       assert has_element?(view, "#no-program")
@@ -68,7 +69,7 @@ defmodule AverzianoWeb.ClientLiveTest do
     end
 
     test "a session of another client is not found", ctx do
-      conn = sign_in(build_conn(), generate(user()))
+      conn = sign_in(build_conn(), generate(client(coach: ctx.coach)))
 
       assert {:error,
               {:live_redirect, %{to: "/app", flash: %{"error" => "Giornata non trovata"}}}} =

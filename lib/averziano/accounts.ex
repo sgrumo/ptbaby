@@ -7,6 +7,8 @@ defmodule Averziano.Accounts do
   use Ash.Domain, otp_app: :averziano
 
   resources do
+    resource Averziano.Accounts.Token
+
     resource Averziano.Accounts.User do
       define :register_user, action: :register
       define :register_coach, action: :register_coach
