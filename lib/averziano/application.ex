@@ -9,6 +9,9 @@ defmodule Averziano.Application do
       [
         AverzianoWeb.Telemetry,
         Averziano.Repo,
+        {Ecto.Migrator,
+         repos: Application.fetch_env!(:averziano, :ecto_repos),
+         skip: !Application.get_env(:averziano, :migrate_on_start, false)},
         telemetry_ui_child(),
         {DNSCluster, query: Application.get_env(:averziano, :dns_cluster_query) || :ignore},
         {Phoenix.PubSub, name: Averziano.PubSub},

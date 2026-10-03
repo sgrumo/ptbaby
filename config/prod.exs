@@ -15,6 +15,9 @@ config :averziano, AverzianoWeb.Endpoint,
 # Session cookies only travel over HTTPS (read at compile time by the endpoint).
 config :averziano, :secure_cookies, true
 
+# Run pending migrations when the app boots, before the endpoint starts.
+config :averziano, :migrate_on_start, true
+
 # Don't start Swoosh's local mailbox storage in production.
 config :swoosh, local: false
 
