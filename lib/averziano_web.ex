@@ -83,6 +83,7 @@ defmodule AverzianoWeb do
   defp html_helpers do
     quote do
       import Phoenix.HTML
+      import AverzianoWeb.CoreComponents
 
       alias Phoenix.LiveView.JS
 

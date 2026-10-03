@@ -24,9 +24,22 @@ defmodule AverzianoWeb.CoreComponents do
   @spec flash_message(map()) :: Phoenix.LiveView.Rendered.t()
   def flash_message(assigns) do
     ~H"""
-    <div :if={msg = Phoenix.Flash.get(@flash, @kind)} role="alert">
-      <p>{msg}</p>
-      <button phx-click={JS.push("lv:clear-flash", value: %{key: @kind})}>
+    <div
+      :if={msg = Phoenix.Flash.get(@flash, @kind)}
+      id={"flash-#{@kind}"}
+      role="alert"
+      class={[
+        "flex items-start gap-3 rounded-xl px-4 py-3 text-sm shadow-q200",
+        @kind == :info && "bg-neutral-800 text-white",
+        @kind == :error && "bg-danger-100 text-danger-800"
+      ]}
+    >
+      <p class="flex-1">{msg}</p>
+      <button
+        type="button"
+        aria-label="Chiudi"
+        phx-click={JS.push("lv:clear-flash", value: %{key: @kind}) |> JS.hide(to: "#flash-#{@kind}")}
+      >
         <.icon name="hero-x-mark" class="h-5 w-5" />
       </button>
     </div>
@@ -56,7 +69,8 @@ defmodule AverzianoWeb.CoreComponents do
   attr :type, :string, default: "text"
   attr :field, Phoenix.HTML.FormField
   attr :errors, :list, default: []
-  attr :rest, :global, include: ~w(placeholder required disabled readonly)
+  attr :class, :any, default: nil
+  attr :rest, :global, include: ~w(placeholder required disabled readonly rows)
 
   @spec input(map()) :: Phoenix.LiveView.Rendered.t()
   def input(%{field: %Phoenix.HTML.FormField{} = field} = assigns) do
@@ -70,6 +84,16 @@ defmodule AverzianoWeb.CoreComponents do
     |> input()
   end
 
+  def input(%{type: "textarea"} = assigns) do
+    ~H"""
+    <div>
+      <label :if={@label} for={@id}>{@label}</label>
+      <textarea name={@name} id={@id} class={@class} {@rest}>{Phoenix.HTML.Form.normalize_value("textarea", @value)}</textarea>
+      <p :for={msg <- @errors} class="text-red-600 text-sm">{msg}</p>
+    </div>
+    """
+  end
+
   def input(assigns) do
     ~H"""
     <div>
@@ -79,6 +103,7 @@ defmodule AverzianoWeb.CoreComponents do
         name={@name}
         id={@id}
         value={Phoenix.HTML.Form.normalize_value(@type, @value)}
+        class={@class}
         {@rest}
       />
       <p :for={msg <- @errors} class="text-red-600 text-sm">{msg}</p>

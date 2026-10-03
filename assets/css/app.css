@@ -1,3 +1,15 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Quinck Design System fonts: Funnel Sans for UI/body, Funnel Display for headings. */
+@font-face { font-family: "Funnel Sans"; src: url("/fonts/FunnelSans-Regular.ttf") format("truetype"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "Funnel Sans"; src: url("/fonts/FunnelSans-Medium.ttf") format("truetype"); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: "Funnel Sans"; src: url("/fonts/FunnelSans-SemiBold.ttf") format("truetype"); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: "Funnel Display"; src: url("/fonts/FunnelDisplay-SemiBold.ttf") format("truetype"); font-weight: 600; font-style: normal; font-display: swap; }
+
+@layer base {
+  body {
+    @apply bg-neutral-50 font-sans text-neutral-800 antialiased;
+  }
+}

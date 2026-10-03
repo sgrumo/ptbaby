@@ -28,6 +28,14 @@ defmodule AverzianoWeb.ConnCase do
   end
 
   @doc """
+  Signs `user` in for the session-based LiveViews (`AverzianoWeb.Live.AuthHook`).
+  """
+  @spec sign_in(Plug.Conn.t(), %{id: String.t()}) :: Plug.Conn.t()
+  def sign_in(conn, %{id: user_id}) do
+    Phoenix.ConnTest.init_test_session(conn, current_user_id: user_id)
+  end
+
+  @doc """
   Adds a superadmin Bearer token to the connection.
   """
   @spec authenticate_superadmin(Plug.Conn.t()) :: Plug.Conn.t()

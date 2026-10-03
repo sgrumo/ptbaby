@@ -9,6 +9,9 @@ defmodule Averziano.Accounts do
   resources do
     resource Averziano.Accounts.User do
       define :register_user, action: :register
+      define :register_coach, action: :register_coach
+      define :invite_client, action: :invite_client
+      define :list_clients, action: :clients
       define :list_users, action: :read
       define :get_user, action: :read, get_by: [:id]
       define :update_user, action: :update

@@ -78,6 +78,13 @@ defmodule Averziano.MixProject do
       # Assets
       {:esbuild, "~> 0.8", runtime: Mix.env() == :dev},
       {:tailwind, "~> 0.2", runtime: Mix.env() == :dev},
+      {:heroicons,
+       github: "tailwindlabs/heroicons",
+       tag: "v2.2.0",
+       sparse: "optimized",
+       app: false,
+       compile: false,
+       depth: 1},
 
       # Utilities
       {:gettext, "~> 1.0"},
@@ -90,7 +97,8 @@ defmodule Averziano.MixProject do
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
 
       # Test
-      {:excoveralls, "~> 0.18", only: :test}
+      {:excoveralls, "~> 0.18", only: :test},
+      {:lazy_html, ">= 0.1.0", only: :test}
     ]
   end
 

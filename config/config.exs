@@ -2,7 +2,7 @@ import Config
 
 config :averziano,
   ecto_repos: [Averziano.Repo],
-  ash_domains: [Averziano.Accounts],
+  ash_domains: [Averziano.Accounts, Averziano.Training],
   generators: [timestamp_type: :utc_datetime, binary_id: true]
 
 # Ash
