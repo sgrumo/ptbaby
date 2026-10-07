@@ -339,4 +339,58 @@ defmodule Averziano.CoachingTest do
       assert Errors.normalize({:error, error}) == {:error, :forbidden}
     end
   end
+
+  describe "client equipment" do
+    test "a coach keeps the list of what a client can train with", ctx do
+      assert {:ok, dumbbells} =
+               Training.add_equipment(
+                 %{client_id: ctx.client.id, name: "Manubri", details: "coppia fino a 20 kg"},
+                 actor: ctx.as_coach
+               )
+
+      assert {:ok, _} =
+               Training.add_equipment(%{client_id: ctx.client.id, name: "Elastici"},
+                 actor: ctx.as_coach
+               )
+
+      assert {:ok, items} = Training.list_client_equipment(ctx.client.id, actor: ctx.as_coach)
+      assert Enum.map(items, &to_string(&1.name)) == ["Elastici", "Manubri"]
+
+      assert {:ok, %{details: "coppia fino a 24 kg"}} =
+               Training.update_equipment(dumbbells, %{details: "coppia fino a 24 kg"},
+                 actor: ctx.as_coach
+               )
+
+      assert :ok = Training.remove_equipment(dumbbells, actor: ctx.as_coach)
+
+      assert {:ok, [_elastics]} =
+               Training.list_client_equipment(ctx.client.id, actor: ctx.as_coach)
+    end
+
+    test "each item appears once per client, regardless of case", ctx do
+      generate(equipment(client: ctx.client, name: "Kettlebell"))
+
+      assert {:error, error} =
+               Training.add_equipment(%{client_id: ctx.client.id, name: "kettlebell"},
+                 actor: ctx.as_coach
+               )
+
+      assert {:error, :unprocessable_entity, %{name: ["è già nella lista"]}} =
+               Errors.normalize({:error, error})
+    end
+
+    test "the list is private to the client's coach", ctx do
+      generate(equipment(client: ctx.client))
+      other_client = %{"sub" => generate(client(coach: ctx.coach)).id}
+
+      assert {:ok, []} = Training.list_client_equipment(ctx.client.id, actor: ctx.as_client)
+
+      assert {:error, error} =
+               Training.add_equipment(%{client_id: ctx.client.id, name: "Panca"},
+                 actor: other_client
+               )
+
+      assert Errors.normalize({:error, error}) == {:error, :forbidden}
+    end
+  end
 end

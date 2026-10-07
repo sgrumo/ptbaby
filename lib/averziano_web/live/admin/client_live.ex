@@ -30,7 +30,10 @@ defmodule AverzianoWeb.Admin.ClientLive do
            nav: :clients,
            client: client,
            today: Date.utc_today(),
-           notes_count: client.id |> Training.list_client_notes!(actor: actor) |> length()
+           counts: %{
+             notes: client.id |> Training.list_client_notes!(actor: actor) |> length(),
+             equipment: client.id |> Training.list_client_equipment!(actor: actor) |> length()
+           }
          )
          |> load_program()}
 
@@ -58,7 +61,12 @@ defmodule AverzianoWeb.Admin.ClientLive do
 
   @impl true
   def handle_params(params, _uri, socket) do
-    tab = if params["tab"] == "note", do: :notes, else: :training
+    tab =
+      case params["tab"] do
+        "note" -> :notes
+        "attrezzatura" -> :equipment
+        _ -> :training
+      end
 
     {:noreply,
      socket
@@ -87,7 +95,10 @@ defmodule AverzianoWeb.Admin.ClientLive do
 
   @impl true
   def handle_info({:notes_count, count}, socket),
-    do: {:noreply, assign(socket, :notes_count, count)}
+    do: {:noreply, update(socket, :counts, &%{&1 | notes: count})}
+
+  def handle_info({:equipment_count, count}, socket),
+    do: {:noreply, update(socket, :counts, &%{&1 | equipment: count})}
 
   # The oldest day to review, else the last completed one, else the next to train.
   defp default_session(sessions, today) do
@@ -334,7 +345,11 @@ defmodule AverzianoWeb.Admin.ClientLive do
     <nav class="flex gap-2 border-b border-neutral-100 px-8" aria-label="Sezioni cliente">
       <.link
         :for={
-          {tab, label, query} <- [{:training, "Allenamento", []}, {:notes, "Note", [tab: "note"]}]
+          {tab, label, query} <- [
+            {:training, "Allenamento", []},
+            {:notes, "Note", [tab: "note"]},
+            {:equipment, "Attrezzatura", [tab: "attrezzatura"]}
+          ]
         }
         id={"tab-#{tab}"}
         patch={~p"/admin/clients/#{@client.id}?#{query}"}
@@ -347,10 +362,10 @@ defmodule AverzianoWeb.Admin.ClientLive do
       >
         {label}
         <span
-          :if={tab == :notes and @notes_count > 0}
+          :if={Map.get(@counts, tab, 0) > 0}
           class="rounded-pill bg-neutral-100 px-1.5 text-xs font-semibold text-neutral-600"
         >
-          {@notes_count}
+          {@counts[tab]}
         </span>
       </.link>
     </nav>
@@ -363,6 +378,14 @@ defmodule AverzianoWeb.Admin.ClientLive do
       programs={@client_programs}
       actor={@actor}
       today={@today}
+    />
+
+    <.live_component
+      :if={@tab == :equipment}
+      module={AverzianoWeb.Admin.ClientEquipmentComponent}
+      id="client-equipment"
+      client={@client}
+      actor={@actor}
     />
 
     <div

@@ -209,6 +209,53 @@ defmodule AverzianoWeb.AdminLiveTest do
     end
   end
 
+  describe "client equipment" do
+    test "adds, edits and removes the equipment of a client", ctx do
+      {:ok, view, _html} =
+        live(ctx.conn, ~p"/admin/clients/#{ctx.client.id}?#{[tab: "attrezzatura"]}")
+
+      assert has_element?(view, "#no-equipment")
+
+      view
+      |> form("#equipment-form", equipment: %{name: "Manubri", details: "coppia fino a 20 kg"})
+      |> render_submit()
+
+      view |> element("button[phx-value-name=\"Elastici\"]") |> render_click()
+
+      list = view |> element("#equipment") |> render()
+      assert list =~ "Manubri"
+      assert list =~ "coppia fino a 20 kg"
+      assert list =~ "Elastici"
+      refute has_element?(view, "button[phx-value-name=\"Elastici\"]")
+      assert view |> element("#tab-equipment") |> render() =~ "2"
+
+      [dumbbells, elastics] = Training.list_client_equipment!(ctx.client.id, actor: ctx.as_coach)
+
+      view |> element("#equipment-#{dumbbells.id} button", "Modifica") |> render_click()
+
+      view
+      |> form("#edit-equipment-#{dumbbells.id}", edit_equipment: %{details: "fino a 24 kg"})
+      |> render_submit()
+
+      assert view |> element("#equipment-#{dumbbells.id}") |> render() =~ "fino a 24 kg"
+
+      view |> element("#equipment-#{elastics.id} button", "Rimuovi") |> render_click()
+      refute has_element?(view, "#equipment-#{elastics.id}")
+    end
+
+    test "the plan editor shows the equipment of the program's client", ctx do
+      generate(equipment(client: ctx.client, name: "Kettlebell", details: "16 kg"))
+      draft = generate(draft_program(coach: ctx.coach, client_id: ctx.client.id))
+
+      {:ok, view, _html} = live(ctx.conn, ~p"/admin/programs/#{draft.id}/edit")
+
+      panel = view |> element("#client-equipment") |> render()
+      assert panel =~ "Attrezzatura di Giulia"
+      assert panel =~ "Kettlebell"
+      assert panel =~ "16 kg"
+    end
+  end
+
   describe "client notes" do
     test "adds, edits and deletes a general note", ctx do
       {:ok, view, _html} = live(ctx.conn, ~p"/admin/clients/#{ctx.client.id}?#{[tab: "note"]}")

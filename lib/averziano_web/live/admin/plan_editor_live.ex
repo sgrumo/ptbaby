@@ -53,6 +53,7 @@ defmodule AverzianoWeb.Admin.PlanEditorLive do
            page_title: program.name,
            record: program,
            clients: clients,
+           equipment: client_equipment(program.client_id, actor),
            plan: %{
              name: program.name,
              client_id: program.client_id,
@@ -91,12 +92,26 @@ defmodule AverzianoWeb.Admin.PlanEditorLive do
     end
   end
 
+  defp client_equipment(client_id, actor) do
+    {:ok, equipment} = Training.list_client_equipment(client_id, actor: actor)
+    equipment
+  end
+
+  # The equipment shown follows the client picked in the plan.
+  defp maybe_switch_client(%{assigns: %{plan: %{client_id: client_id}}} = socket, new_id)
+       when is_binary(new_id) and new_id != client_id,
+       do: assign(socket, :equipment, client_equipment(new_id, socket.assigns.actor))
+
+  defp maybe_switch_client(socket, _client_id), do: socket
+
   ## Plan meta
 
   @impl true
   def handle_event("meta", %{"plan" => params}, socket) do
     {:noreply,
-     update(socket, :plan, fn plan ->
+     socket
+     |> maybe_switch_client(params["client_id"])
+     |> update(:plan, fn plan ->
        moved? = Map.has_key?(plan, :starts_on) and params["starts_on"] != plan.starts_on
 
        plan
@@ -745,6 +760,34 @@ defmodule AverzianoWeb.Admin.PlanEditorLive do
               </dd>
             </div>
           </dl>
+        <% end %>
+        <%= if @live_action == :program do %>
+          <div class="h-px bg-neutral-100"></div>
+          <div id="client-equipment" class="flex flex-col gap-2">
+            <div class="flex items-center justify-between">
+              <span class="text-[13px] font-semibold text-neutral-600">
+                Attrezzatura di {TrainingLabels.first_name(client_name(assigns))}
+              </span>
+              <.link
+                navigate={~p"/admin/clients/#{@plan.client_id}?#{[tab: "attrezzatura"]}"}
+                class="text-[13px] font-semibold text-primary-600 hover:text-primary-700"
+              >
+                Modifica
+              </.link>
+            </div>
+            <p :if={@equipment == []} class="text-[13px] text-neutral-500">
+              Nessuna attrezzatura indicata.
+            </p>
+            <ul :if={@equipment != []} class="flex flex-col gap-1.5 text-sm">
+              <li :for={item <- @equipment} class="flex gap-2">
+                <.icon name="hero-check-mini" class="mt-0.5 h-4 w-4 shrink-0 text-success-600" />
+                <span>
+                  <span class="font-medium">{item.name}</span>
+                  <span :if={item.details} class="text-neutral-500">· {item.details}</span>
+                </span>
+              </li>
+            </ul>
+          </div>
         <% end %>
         <div class="flex gap-2 rounded-xl bg-info-100 px-3.5 py-3 text-[13px] leading-[18px] text-info-800">
           <.icon name="hero-information-circle" class="h-4 w-4 shrink-0" />

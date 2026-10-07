@@ -15,7 +15,7 @@ defmodule Averziano.Generator do
   use Ash.Generator
 
   alias Averziano.Accounts.User
-  alias Averziano.Training.{Exercise, Program, Session, SetLog, Template}
+  alias Averziano.Training.{Equipment, Exercise, Program, Session, SetLog, Template}
 
   @spec user(keyword()) :: StreamData.t(Ash.Changeset.t())
   def user(opts \\ []) do
@@ -53,6 +53,19 @@ defmodule Averziano.Generator do
       ],
       overrides: opts,
       actor: %{"sub" => coach.id},
+      authorize?: false
+    )
+  end
+
+  @doc "A piece of equipment of `client` (a user), added by their coach."
+  @spec equipment(keyword()) :: StreamData.t(Ash.Changeset.t())
+  def equipment(opts) do
+    {client, opts} = Keyword.pop!(opts, :client)
+
+    changeset_generator(Equipment, :create,
+      defaults: [client_id: client.id, name: "Manubri", details: nil],
+      overrides: opts,
+      actor: %{"sub" => client.coach_id},
       authorize?: false
     )
   end

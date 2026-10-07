@@ -63,6 +63,13 @@ defmodule Averziano.Training do
       define :list_client_notes, action: :for_client, args: [:client_id]
     end
 
+    resource Averziano.Training.Equipment do
+      define :add_equipment, action: :create
+      define :update_equipment, action: :update
+      define :remove_equipment, action: :destroy
+      define :list_client_equipment, action: :for_client, args: [:client_id]
+    end
+
     resource Averziano.Training.SetLog do
       define :log_set, action: :log
     end
