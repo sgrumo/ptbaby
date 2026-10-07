@@ -101,7 +101,7 @@ defmodule AverzianoWeb.Client.SessionDoneLive do
           <span class="px-1 text-[13px] text-neutral-500">Inviata a {coach_name(@session)}.</span>
         </div>
 
-        <div class="sticky bottom-0 mt-auto flex flex-col gap-2 bg-white px-4 pb-4 pt-6">
+        <div class="sticky bottom-0 mt-auto flex flex-col gap-2 bg-surface px-4 pb-4 pt-6">
           <.action_button navigate={~p"/app?#{[week: @session.week_number]}"}>Torna al programma</.action_button>
         </div>
       <% else %>
@@ -121,7 +121,7 @@ defmodule AverzianoWeb.Client.SessionDoneLive do
             </span>
           </div>
 
-          <div class="sticky bottom-0 mt-auto flex flex-col gap-2 bg-white px-4 pb-4 pt-6">
+          <div class="sticky bottom-0 mt-auto flex flex-col gap-2 bg-surface px-4 pb-4 pt-6">
             <.action_button type="submit" phx-disable-with="Invio…">Invia al coach</.action_button>
             <.link
               :if={exercise = List.first(@session.exercises)}

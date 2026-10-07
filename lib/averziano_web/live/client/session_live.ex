@@ -100,7 +100,7 @@ defmodule AverzianoWeb.Client.SessionLive do
 
       <div
         :if={exercise = resume_exercise(@session)}
-        class="sticky bottom-0 mt-auto bg-white px-4 pb-4 pt-6"
+        class="sticky bottom-0 mt-auto bg-surface px-4 pb-4 pt-6"
       >
         <.action_button
           id="start-workout"

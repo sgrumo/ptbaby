@@ -1,4 +1,4 @@
-<div class="flex min-h-dvh bg-white">
+<div class="flex min-h-dvh bg-surface">
   <aside class="sticky top-0 flex h-dvh w-60 shrink-0 flex-col gap-8 border-r border-neutral-200 bg-neutral-50 px-4 py-6">
     <.link
       navigate={~p"/admin"}
@@ -26,6 +26,7 @@
       </.nav_link>
     </nav>
     <div class="flex-1"></div>
+    <.theme_toggle class="self-start" />
     <div class="flex items-center gap-2.5 p-2">
       <.avatar name={@current_user.name} tone={:dark} class="h-9 w-9 text-[13px]" />
       <div class="flex min-w-0 flex-col">

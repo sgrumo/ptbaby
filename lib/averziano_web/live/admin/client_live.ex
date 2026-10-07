@@ -4,7 +4,7 @@ defmodule AverzianoWeb.Admin.ClientLive do
   with each day's status, and the selected day (`?session=`) with the logged
   sets against the targets. From here the coach changes the target of the
   next or all future replicas of an exercise and reviews the day, optionally
-  with a comment.
+  with a comment. The `:edit` action opens the "Modifica cliente" dialog.
   """
 
   use AverzianoWeb, :live_view
@@ -12,6 +12,7 @@ defmodule AverzianoWeb.Admin.ClientLive do
   import AverzianoWeb.AdminComponents
   import AverzianoWeb.ClientComponents, only: [badge: 1]
 
+  alias AshPhoenix.Form
   alias Averziano.{Accounts, Errors, Training}
   alias Averziano.Accounts.User
   alias AverzianoWeb.Admin.PlanParams
@@ -27,7 +28,6 @@ defmodule AverzianoWeb.Admin.ClientLive do
          socket
          |> assign(
            nav: :clients,
-           page_title: client.name,
            client: client,
            today: Date.utc_today(),
            notes_count: client.id |> Training.list_client_notes!(actor: actor) |> length()
@@ -59,8 +59,21 @@ defmodule AverzianoWeb.Admin.ClientLive do
   @impl true
   def handle_params(params, _uri, socket) do
     tab = if params["tab"] == "note", do: :notes, else: :training
-    {:noreply, socket |> assign(:tab, tab) |> select_session(params)}
+
+    {:noreply,
+     socket
+     |> assign(:tab, tab)
+     |> select_session(params)
+     |> assign_edit(socket.assigns.live_action)}
   end
+
+  defp assign_edit(%{assigns: %{client: client, actor: actor}} = socket, :edit) do
+    form = client |> Form.for_update(:update_client, actor: actor) |> to_form()
+    assign(socket, edit_form: form, page_title: "Modifica cliente")
+  end
+
+  defp assign_edit(socket, _action),
+    do: assign(socket, edit_form: nil, page_title: socket.assigns.client.name)
 
   defp select_session(%{assigns: %{program: %{} = program}} = socket, params) do
     session =
@@ -95,6 +108,24 @@ defmodule AverzianoWeb.Admin.ClientLive do
   end
 
   @impl true
+  def handle_event("validate_client", %{"form" => params}, socket) do
+    {:noreply, update(socket, :edit_form, &Form.validate(&1, params))}
+  end
+
+  def handle_event("save_client", %{"form" => params}, socket) do
+    case Form.submit(socket.assigns.edit_form, params: params) do
+      {:ok, client} ->
+        {:noreply,
+         socket
+         |> assign(:client, client)
+         |> put_flash(:info, "Dati di #{client.name} aggiornati")
+         |> push_patch(to: ~p"/admin/clients/#{client.id}")}
+
+      {:error, form} ->
+        {:noreply, assign(socket, :edit_form, form)}
+    end
+  end
+
   def handle_event("edit_target", %{"id" => id}, socket) do
     exercise = Enum.find(socket.assigns.session.exercises, &(&1.id == id))
 
@@ -265,6 +296,9 @@ defmodule AverzianoWeb.Admin.ClientLive do
               / {@client.name}
             </span>
             <span class="text-[22px] font-semibold leading-7">{@client.name}</span>
+            <span id="client-contacts" class="truncate text-[13px] text-neutral-500">
+              {@client.email}{if @client.phone, do: " · #{@client.phone}"}
+            </span>
           </div>
         </div>
       </:heading>
@@ -284,6 +318,9 @@ defmodule AverzianoWeb.Admin.ClientLive do
             </dd>
           </div>
         </dl>
+        <.button variant={:outline} patch={~p"/admin/clients/#{@client.id}/edit"} icon="hero-pencil">
+          Modifica
+        </.button>
         <.button
           variant={:outline}
           navigate={~p"/admin/templates?#{[client: @client.id]}"}
@@ -467,6 +504,48 @@ defmodule AverzianoWeb.Admin.ClientLive do
         </div>
       </section>
     </div>
+
+    <.modal
+      :if={@edit_form}
+      id="edit-client-modal"
+      title="Modifica cliente"
+      subtitle="Con la nuova email il cliente riceverà lì i link di accesso."
+      on_cancel={JS.patch(~p"/admin/clients/#{@client.id}")}
+    >
+      <.form
+        for={@edit_form}
+        id="edit-client-form"
+        phx-change="validate_client"
+        phx-submit="save_client"
+      >
+        <div class="flex flex-col gap-4 p-6">
+          <.field label="Nome e cognome" for="edit-client-name">
+            <.input field={@edit_form[:name]} id="edit-client-name" class={input_class()} />
+          </.field>
+          <.field label="Email" for="edit-client-email">
+            <.input
+              field={@edit_form[:email]}
+              id="edit-client-email"
+              type="email"
+              class={input_class()}
+            />
+          </.field>
+          <.field label="Telefono · opzionale" for="edit-client-phone">
+            <.input
+              field={@edit_form[:phone]}
+              id="edit-client-phone"
+              type="tel"
+              placeholder="+39"
+              class={input_class()}
+            />
+          </.field>
+        </div>
+        <div class="flex justify-end gap-2 border-t border-neutral-100 px-6 py-4">
+          <.button variant={:outline} patch={~p"/admin/clients/#{@client.id}"}>Annulla</.button>
+          <.button type="submit" phx-disable-with="Salvataggio…">Salva</.button>
+        </div>
+      </.form>
+    </.modal>
     """
   end
 

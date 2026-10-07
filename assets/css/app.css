@@ -8,8 +8,56 @@
 @font-face { font-family: "Funnel Sans"; src: url("/fonts/FunnelSans-SemiBold.ttf") format("truetype"); font-weight: 600; font-style: normal; font-display: swap; }
 @font-face { font-family: "Funnel Display"; src: url("/fonts/FunnelDisplay-SemiBold.ttf") format("truetype"); font-weight: 600; font-style: normal; font-display: swap; }
 
+/* Color tokens as RGB channels (see tailwind.config.js). The root layout sets
+   `data-theme` on <html> from the saved choice or the system preference. */
+:root {
+  color-scheme: light;
+  --color-surface: 255 255 255;
+  --color-neutral-50: 247 247 248; --color-neutral-100: 237 237 237; --color-neutral-200: 216 216 221;
+  --color-neutral-300: 185 187 198; --color-neutral-400: 143 146 163; --color-neutral-500: 113 113 122;
+  --color-neutral-600: 58 61 79; --color-neutral-700: 42 44 58; --color-neutral-800: 30 30 30;
+  --color-neutral-900: 17 17 20;
+  --color-primary-100: 221 210 255; --color-primary-200: 194 176 255; --color-primary-300: 169 142 255;
+  --color-primary-400: 143 108 255; --color-primary-500: 113 62 255; --color-primary-600: 94 48 230;
+  --color-primary-700: 75 36 191; --color-primary-800: 57 26 153;
+  --color-success-100: 232 255 247; --color-success-200: 189 252 231; --color-success-400: 52 211 153;
+  --color-success-600: 5 150 105; --color-success-800: 6 95 70;
+  --color-warning-100: 249 255 204; --color-warning-200: 244 255 179; --color-warning-400: 221 235 110;
+  --color-warning-600: 174 191 50; --color-warning-800: 110 124 26;
+  --color-danger-100: 254 226 226; --color-danger-200: 254 202 202; --color-danger-400: 248 113 113;
+  --color-danger-600: 220 38 38; --color-danger-800: 153 27 27;
+  --color-info-100: 230 248 255; --color-info-200: 190 234 255; --color-info-600: 7 89 196;
+  --color-info-800: 7 89 133;
+}
+
+/* Dark: the neutral scale is inverted (50 is a dark fill, 800 is the text),
+   tints (100/200) become deep backgrounds and their 800 text becomes light. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-surface: 23 23 28;
+  --color-neutral-50: 32 32 39; --color-neutral-100: 42 42 51; --color-neutral-200: 58 58 69;
+  --color-neutral-300: 88 89 104; --color-neutral-400: 125 127 143; --color-neutral-500: 152 153 166;
+  --color-neutral-600: 184 185 196; --color-neutral-700: 210 211 219; --color-neutral-800: 236 236 240;
+  --color-neutral-900: 247 247 250;
+  --color-primary-100: 44 33 92; --color-primary-200: 61 45 128; --color-primary-300: 96 72 196;
+  --color-primary-400: 130 100 255; --color-primary-500: 143 108 255; --color-primary-600: 133 98 255;
+  --color-primary-700: 158 128 255; --color-primary-800: 201 186 255;
+  --color-success-100: 14 52 40; --color-success-200: 20 80 60; --color-success-800: 167 243 208;
+  --color-warning-100: 50 54 16; --color-warning-200: 70 76 20; --color-warning-800: 230 240 140;
+  --color-danger-100: 69 20 20; --color-danger-200: 100 28 28; --color-danger-600: 239 68 68;
+  --color-danger-800: 254 202 202;
+  --color-info-100: 12 40 66; --color-info-200: 18 60 100; --color-info-600: 96 165 250;
+  --color-info-800: 186 230 253;
+}
+
 @layer base {
   body {
     @apply bg-neutral-50 font-sans text-neutral-800 antialiased;
+  }
+
+  /* @tailwindcss/forms paints controls white with gray borders. */
+  [type="text"], [type="email"], [type="tel"], [type="number"], [type="search"], [type="date"],
+  [type="password"], [type="url"], textarea, select {
+    @apply border-neutral-200 bg-surface text-neutral-800 placeholder:text-neutral-400;
   }
 }

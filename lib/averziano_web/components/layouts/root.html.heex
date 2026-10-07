@@ -7,6 +7,29 @@
     <.live_title default="Averziano">
       {assigns[:page_title]}
     </.live_title>
+    <script>
+      // Theme: the saved choice ("light" or "dark"), else the system preference.
+      // Inline so the page never paints in the wrong theme.
+      (() => {
+        const media = window.matchMedia("(prefers-color-scheme: dark)")
+        let choice = "system"
+        try { choice = localStorage.getItem("theme") || "system" } catch (_e) {}
+        const apply = () => {
+          const theme = choice === "system" ? (media.matches ? "dark" : "light") : choice
+          document.documentElement.dataset.theme = theme
+          document.documentElement.dataset.themeChoice = choice
+        }
+        apply()
+        media.addEventListener("change", apply)
+        window.addEventListener("phx:set-theme", ({target}) => {
+          choice = target.dataset.phxTheme
+          try {
+            choice === "system" ? localStorage.removeItem("theme") : localStorage.setItem("theme", choice)
+          } catch (_e) {}
+          apply()
+        })
+      })()
+    </script>
     <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
     <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}>
     </script>

@@ -73,7 +73,8 @@ defmodule AverzianoWeb.Router do
       layout: {AverzianoWeb.Layouts, :admin} do
       live "/", ClientsLive, :index
       live "/clients/new", ClientsLive, :invite
-      live "/clients/:client_id", ClientLive
+      live "/clients/:client_id", ClientLive, :show
+      live "/clients/:client_id/edit", ClientLive, :edit
       live "/programs", ProgramsLive
       live "/programs/:id/edit", PlanEditorLive, :program
       live "/templates", TemplatesLive

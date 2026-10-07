@@ -17,6 +17,7 @@ defmodule Averziano.Accounts do
       define :list_users, action: :read
       define :get_user, action: :read, get_by: [:id]
       define :update_user, action: :update
+      define :update_client, action: :update_client
       define :delete_user, action: :destroy
     end
   end

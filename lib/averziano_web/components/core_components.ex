@@ -30,7 +30,7 @@ defmodule AverzianoWeb.CoreComponents do
       role="alert"
       class={[
         "flex items-start gap-3 rounded-xl px-4 py-3 text-sm shadow-q200",
-        @kind == :info && "bg-neutral-800 text-white",
+        @kind == :info && "bg-neutral-800 text-neutral-50",
         @kind == :error && "bg-danger-100 text-danger-800"
       ]}
     >
@@ -58,6 +58,55 @@ defmodule AverzianoWeb.CoreComponents do
     <.flash_message flash={@flash} kind={:error} />
     """
   end
+
+  @doc """
+  Switches between the system, light and dark themes. The choice is applied
+  and remembered in the browser by the script in the root layout.
+  """
+  attr :class, :any, default: nil
+
+  @spec theme_toggle(map()) :: Phoenix.LiveView.Rendered.t()
+  def theme_toggle(assigns) do
+    ~H"""
+    <div
+      role="group"
+      aria-label="Tema"
+      class={["flex items-center gap-0.5 rounded-pill bg-neutral-100 p-0.5", @class]}
+    >
+      <button
+        :for={
+          {theme, icon, label} <- [
+            {"system", "hero-computer-desktop-micro", "Tema di sistema"},
+            {"light", "hero-sun-micro", "Tema chiaro"},
+            {"dark", "hero-moon-micro", "Tema scuro"}
+          ]
+        }
+        type="button"
+        aria-label={label}
+        title={label}
+        data-phx-theme={theme}
+        phx-click={JS.dispatch("phx:set-theme")}
+        class={[
+          "flex h-7 w-7 items-center justify-center rounded-full text-neutral-500 hover:text-neutral-800",
+          theme_selected_class(theme)
+        ]}
+      >
+        <.icon name={icon} class="h-4 w-4" />
+      </button>
+    </div>
+    """
+  end
+
+  # Literal classes, so that Tailwind finds them.
+  defp theme_selected_class("system"),
+    do:
+      "[[data-theme-choice=system]_&]:bg-surface [[data-theme-choice=system]_&]:text-neutral-800"
+
+  defp theme_selected_class("light"),
+    do: "[[data-theme-choice=light]_&]:bg-surface [[data-theme-choice=light]_&]:text-neutral-800"
+
+  defp theme_selected_class("dark"),
+    do: "[[data-theme-choice=dark]_&]:bg-surface [[data-theme-choice=dark]_&]:text-neutral-800"
 
   @doc """
   Renders an input with label and error messages.

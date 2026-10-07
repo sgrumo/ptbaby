@@ -259,7 +259,7 @@ defmodule AverzianoWeb.Client.WorkoutLive do
       <div
         :if={@rest}
         id="rest-banner"
-        class="mx-4 mt-2 flex items-center justify-between rounded-xl bg-neutral-800 px-4 py-3 text-white"
+        class="mx-4 mt-2 flex items-center justify-between rounded-xl bg-neutral-800 px-4 py-3 text-neutral-50"
       >
         <div class="flex items-center gap-2.5">
           <.icon name="hero-clock" class="h-5 w-5" />
@@ -304,7 +304,7 @@ defmodule AverzianoWeb.Client.WorkoutLive do
         <% end %>
       </div>
 
-      <div class="sticky bottom-0 mt-auto flex items-center justify-between border-t border-neutral-100 bg-white px-4 py-3">
+      <div class="sticky bottom-0 mt-auto flex items-center justify-between border-t border-neutral-100 bg-surface px-4 py-3">
         <.link
           :if={@prev}
           patch={exercise_path(@session, @prev)}
@@ -387,7 +387,7 @@ defmodule AverzianoWeb.Client.WorkoutLive do
               <button
                 type="button"
                 phx-click="stop_hold"
-                class="flex h-11 items-center gap-2 rounded-pill bg-neutral-800 px-6 text-[15px] font-semibold text-white"
+                class="flex h-11 items-center gap-2 rounded-pill bg-neutral-800 px-6 text-[15px] font-semibold text-neutral-50"
               >
                 <.icon name="hero-stop-solid" class="h-[18px] w-[18px]" />Ferma
               </button>
@@ -398,7 +398,7 @@ defmodule AverzianoWeb.Client.WorkoutLive do
               <button
                 type="button"
                 phx-click="start_hold"
-                class="flex h-11 items-center gap-2 rounded-pill bg-neutral-800 px-6 text-[15px] font-semibold text-white"
+                class="flex h-11 items-center gap-2 rounded-pill bg-neutral-800 px-6 text-[15px] font-semibold text-neutral-50"
               >
                 <.icon name="hero-play-solid" class="h-[18px] w-[18px]" />Avvia timer
               </button>
@@ -434,7 +434,7 @@ defmodule AverzianoWeb.Client.WorkoutLive do
                 aria-pressed={to_string(@draft.outcome == outcome)}
                 class={[
                   "flex h-11 flex-1 items-center justify-center rounded-pill text-sm",
-                  @draft.outcome == outcome && "bg-neutral-800 font-semibold text-white",
+                  @draft.outcome == outcome && "bg-neutral-800 font-semibold text-neutral-50",
                   @draft.outcome != outcome && "border border-neutral-200 font-medium"
                 ]}
               >

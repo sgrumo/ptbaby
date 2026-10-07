@@ -81,6 +81,29 @@ defmodule AverzianoWeb.AdminLiveTest do
       assert view |> element("#clients") |> render() =~ "Invito inviato"
     end
 
+    test "edits a client's details", ctx do
+      {:ok, view, _html} = live(ctx.conn, ~p"/admin/clients/#{ctx.client.id}")
+
+      view |> element("a", "Modifica") |> render_click()
+      assert_patch(view, ~p"/admin/clients/#{ctx.client.id}/edit")
+
+      assert view
+             |> form("#edit-client-form", form: %{name: ""})
+             |> render_change() =~ "is required"
+
+      view
+      |> form("#edit-client-form",
+        form: %{name: "Giulia Bianchi", email: "giulia@example.com", phone: "+39 333 1234567"}
+      )
+      |> render_submit()
+
+      assert_patch(view, ~p"/admin/clients/#{ctx.client.id}")
+      assert render(view) =~ "Dati di Giulia Bianchi aggiornati"
+
+      assert view |> element("#client-contacts") |> render() =~
+               "giulia@example.com · +39 333 1234567"
+    end
+
     test "someone who isn't the coach's client is not found", ctx do
       stranger = generate(user())
 

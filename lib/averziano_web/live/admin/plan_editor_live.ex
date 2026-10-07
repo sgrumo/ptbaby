@@ -825,7 +825,7 @@ defmodule AverzianoWeb.Admin.PlanEditorLive do
               class={[
                 "flex h-8 items-center rounded-pill px-3 text-[13px]",
                 @exercise.kind == kind &&
-                  "bg-white font-semibold shadow-[0_1px_2px_0_rgba(30,41,59,0.12)]",
+                  "bg-surface font-semibold shadow-[0_1px_2px_0_rgba(30,41,59,0.12)] dark:bg-neutral-200",
                 @exercise.kind != kind && "text-neutral-600"
               ]}
             >

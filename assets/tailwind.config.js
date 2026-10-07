@@ -2,7 +2,11 @@ const plugin = require("tailwindcss/plugin")
 const fs = require("fs")
 const path = require("path")
 
+const token = name => `rgb(var(--color-${name}) / <alpha-value>)`
+const scale = (name, steps) => Object.fromEntries(steps.map(step => [step, token(`${name}-${step}`)]))
+
 module.exports = {
+  darkMode: ["selector", '[data-theme="dark"]'],
   content: [
     "./js/**/*.js",
     "../lib/averziano_web.ex",
@@ -10,20 +14,16 @@ module.exports = {
   ],
   theme: {
     extend: {
-      // Quinck Design System tokens (colors_and_type.css)
+      // Quinck Design System tokens (colors_and_type.css). Values live in
+      // css/app.css as RGB channels so dark mode can swap them in one place.
       colors: {
-        neutral: {
-          50: "#F7F7F8", 100: "#EDEDED", 200: "#D8D8DD", 300: "#B9BBC6", 400: "#8F92A3",
-          500: "#71717A", 600: "#3A3D4F", 700: "#2A2C3A", 800: "#1E1E1E", 900: "#111114"
-        },
-        primary: {
-          100: "#DDD2FF", 200: "#C2B0FF", 300: "#A98EFF", 400: "#8F6CFF",
-          500: "#713EFF", 600: "#5E30E6", 700: "#4B24BF", 800: "#391A99"
-        },
-        success: {100: "#E8FFF7", 200: "#BDFCE7", 400: "#34D399", 600: "#059669", 800: "#065F46"},
-        warning: {100: "#F9FFCC", 200: "#F4FFB3", 400: "#DDEB6E", 600: "#AEBF32", 800: "#6E7C1A"},
-        danger: {100: "#FEE2E2", 200: "#FECACA", 400: "#F87171", 600: "#DC2626", 800: "#991B1B"},
-        info: {100: "#E6F8FF", 200: "#BEEAFF", 600: "#0759C4", 800: "#075985"}
+        surface: token("surface"),
+        neutral: scale("neutral", [50, 100, 200, 300, 400, 500, 600, 700, 800, 900]),
+        primary: scale("primary", [100, 200, 300, 400, 500, 600, 700, 800]),
+        success: scale("success", [100, 200, 400, 600, 800]),
+        warning: scale("warning", [100, 200, 400, 600, 800]),
+        danger: scale("danger", [100, 200, 400, 600, 800]),
+        info: scale("info", [100, 200, 600, 800])
       },
       fontFamily: {
         sans: ["Funnel Sans", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "Helvetica", "Arial", "sans-serif"],

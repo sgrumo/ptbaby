@@ -99,6 +99,7 @@ defmodule AverzianoWeb.Client.ProgramLive do
         <div class="flex items-center justify-between">
           <span class="text-sm text-neutral-500">Ciao {TrainingLabels.first_name(@name)}</span>
           <div class="flex items-center gap-3">
+            <.theme_toggle />
             <.link
               href={~p"/sign-out"}
               method="delete"
@@ -157,7 +158,7 @@ defmodule AverzianoWeb.Client.ProgramLive do
           class="mx-4 mt-3 flex flex-col gap-3.5 rounded-[20px] bg-primary-600 p-5 text-white"
         >
           <div class="flex flex-col gap-0.5">
-            <span class="text-[13px] text-primary-100">
+            <span class="text-[13px] text-white/80">
               {if @featured.scheduled_on == @today, do: "Oggi", else: "Prossimo"} · {TrainingLabels.long_date(
                 @featured.scheduled_on
               )}
@@ -165,7 +166,7 @@ defmodule AverzianoWeb.Client.ProgramLive do
             <span class="text-[22px] font-semibold leading-7">
               Giorno {@featured.day_label} · {@featured.title}
             </span>
-            <span class="text-sm text-primary-100">
+            <span class="text-sm text-white/80">
               {@featured.exercises_count} esercizi · {@featured.sets_total} serie
             </span>
           </div>
@@ -186,7 +187,7 @@ defmodule AverzianoWeb.Client.ProgramLive do
             aria-current={week == @week && "page"}
             class={[
               "flex h-11 flex-1 items-center justify-center gap-1 rounded-pill text-sm font-medium",
-              week == @week && "bg-neutral-800 text-white",
+              week == @week && "bg-neutral-800 text-neutral-50",
               week != @week && "border border-neutral-200"
             ]}
           >

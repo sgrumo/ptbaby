@@ -84,6 +84,34 @@ defmodule Averziano.AccountsTest do
     end
   end
 
+  describe "update_client/3" do
+    test "the coach edits their clients' details; clients can't", ctx do
+      params = %{name: "Ada Byron", email: "ada@example.com", phone: "+39 333 1234567"}
+
+      assert {:ok, %User{name: "Ada Byron", phone: "+39 333 1234567"} = client} =
+               Accounts.update_client(ctx.client, params, actor: ctx.as_coach)
+
+      assert to_string(client.email) == "ada@example.com"
+
+      assert {:ok, %User{phone: nil}} =
+               Accounts.update_client(client, %{phone: nil}, actor: ctx.as_coach)
+
+      assert {:error, error} =
+               Accounts.update_client(client, %{name: "Nope"}, actor: ctx.as_client)
+
+      assert Errors.normalize({:error, error}) == {:error, :forbidden}
+    end
+
+    test "the email stays unique", ctx do
+      other = generate(client(coach: ctx.coach))
+
+      assert {:error, error} =
+               Accounts.update_client(ctx.client, %{email: other.email}, actor: ctx.as_coach)
+
+      assert {:error, :unprocessable_entity, %{email: [_]}} = Errors.normalize({:error, error})
+    end
+  end
+
   describe "policies" do
     test "without an actor, reads are filtered to nothing and writes are forbidden", ctx do
       # `no_filter_static_forbidden_reads?: false` turns a forbidden read into an empty result.

@@ -89,6 +89,11 @@ defmodule Averziano.Accounts.User do
     update :update do
       accept [:name]
     end
+
+    update :update_client do
+      description "The coach corrects the details of one of their clients."
+      accept [:name, :email, :phone]
+    end
   end
 
   policies do
@@ -115,7 +120,7 @@ defmodule Averziano.Accounts.User do
       authorize_if expr(id == ^actor("sub"))
     end
 
-    policy action(:destroy) do
+    policy action([:update_client, :destroy]) do
       authorize_if expr(coach_id == ^actor("sub"))
     end
   end

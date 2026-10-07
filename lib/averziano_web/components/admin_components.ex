@@ -45,7 +45,7 @@ defmodule AverzianoWeb.AdminComponents do
     <span class={[
       "flex shrink-0 items-center justify-center rounded-full font-semibold",
       @tone == :soft && "bg-primary-100 text-primary-800",
-      @tone == :dark && "bg-neutral-800 text-white",
+      @tone == :dark && "bg-neutral-800 text-neutral-50",
       @tone == :muted && "bg-neutral-100 text-neutral-600",
       @class
     ]}>
@@ -88,7 +88,7 @@ defmodule AverzianoWeb.AdminComponents do
         assigns.size == :md && "h-10 px-4 text-sm",
         assigns.size == :sm && "h-8 px-3 text-[13px]",
         assigns.variant == :primary && "bg-primary-600 text-white hover:bg-primary-700",
-        assigns.variant == :outline && "border border-neutral-200 bg-white hover:bg-neutral-50",
+        assigns.variant == :outline && "border border-neutral-200 bg-surface hover:bg-neutral-50",
         assigns.variant == :ghost && "text-neutral-600 hover:bg-neutral-50",
         assigns.class
       ])
@@ -124,7 +124,7 @@ defmodule AverzianoWeb.AdminComponents do
   @doc "Classes of a text-like control of the console."
   @spec input_class() :: String.t()
   def input_class do
-    "block h-10 w-full rounded-lg border border-neutral-200 bg-white px-3 text-sm focus:border-primary-500 focus:ring-0"
+    "block h-10 w-full rounded-lg border border-neutral-200 bg-surface px-3 text-sm focus:border-primary-500 focus:ring-0"
   end
 
   @doc "A thin progress bar."
@@ -157,7 +157,7 @@ defmodule AverzianoWeb.AdminComponents do
   @spec modal(map()) :: Phoenix.LiveView.Rendered.t()
   def modal(assigns) do
     ~H"""
-    <div id={@id} class="fixed inset-0 z-40 flex items-center justify-center bg-neutral-900/40 p-6">
+    <div id={@id} class="fixed inset-0 z-40 flex items-center justify-center bg-black/50 p-6">
       <div
         role="dialog"
         aria-modal="true"
@@ -165,7 +165,7 @@ defmodule AverzianoWeb.AdminComponents do
         phx-click-away={@on_cancel}
         phx-window-keydown={@on_cancel}
         phx-key="escape"
-        class="flex w-[520px] max-w-full flex-col rounded-2xl bg-white shadow-[0_16px_24px_-4px_rgba(30,41,59,0.16)]"
+        class="flex w-[520px] max-w-full flex-col rounded-2xl bg-surface shadow-[0_16px_24px_-4px_rgba(30,41,59,0.16)]"
       >
         <div class="flex items-start justify-between px-6 pt-6">
           <div class="flex flex-col gap-1">
@@ -202,7 +202,7 @@ defmodule AverzianoWeb.AdminComponents do
       <div
         id={@id}
         phx-click-away={JS.hide(to: "##{@id}")}
-        class="absolute right-0 top-8 z-10 hidden w-40 flex-col rounded-xl border border-neutral-200 bg-white py-1 shadow-q200 [&>*]:px-3 [&>*]:py-2 [&>*]:text-left [&>*]:text-sm hover:[&>*]:bg-neutral-50"
+        class="absolute right-0 top-8 z-10 hidden w-40 flex-col rounded-xl border border-neutral-200 bg-surface py-1 shadow-q200 [&>*]:px-3 [&>*]:py-2 [&>*]:text-left [&>*]:text-sm hover:[&>*]:bg-neutral-50"
       >
         {render_slot(@item)}
       </div>

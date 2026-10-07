@@ -126,7 +126,7 @@ defmodule AverzianoWeb.ClientComponents do
       phx-click={@event}
       phx-value-field={@field}
       aria-label={@label}
-      class="flex h-11 w-11 items-center justify-center rounded-full border border-neutral-200 bg-white active:bg-neutral-50"
+      class="flex h-11 w-11 items-center justify-center rounded-full border border-neutral-200 bg-surface active:bg-neutral-50"
     >
       <.icon name={if @event == "inc", do: "hero-plus", else: "hero-minus"} class="h-5 w-5" />
     </button>
@@ -169,8 +169,8 @@ defmodule AverzianoWeb.ClientComponents do
         "flex h-14 w-full items-center justify-center gap-2 rounded-pill text-base font-semibold transition",
         assigns.variant == :primary &&
           "bg-primary-600 text-white hover:bg-primary-700 active:bg-primary-800",
-        assigns.variant == :outline && "border border-neutral-200 bg-white hover:bg-neutral-50",
-        assigns.variant == :inverse && "bg-white text-primary-600 hover:bg-primary-100",
+        assigns.variant == :outline && "border border-neutral-200 bg-surface hover:bg-neutral-50",
+        assigns.variant == :inverse && "bg-white text-primary-600 hover:bg-white/90",
         assigns.class
       ])
 

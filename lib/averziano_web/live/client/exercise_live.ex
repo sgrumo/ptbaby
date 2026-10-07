@@ -134,7 +134,7 @@ defmodule AverzianoWeb.Client.ExerciseLive do
         </a>
       </div>
 
-      <div class="sticky bottom-0 mt-auto bg-white px-4 pb-4 pt-6">
+      <div class="sticky bottom-0 mt-auto bg-surface px-4 pb-4 pt-6">
         <.action_button
           navigate={~p"/app/sessions/#{@exercise.session_id}/exercises/#{@exercise.id}"}
           variant={:outline}
